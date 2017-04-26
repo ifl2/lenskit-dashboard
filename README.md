@@ -13,7 +13,7 @@ To Run:
 2. Will be listeting at localhost:3000
 
 Functionality:
-* 'Current Experiments' button opens a dropdown that displays numbered experiments currently stored in the database. This button will refresh its contents every time it is pressed.
+* 'Current Experiments' button opens a dropdown that displays numbered experiments currently stored in the database. This button will refresh its contents every time it is pressed, as well as any time the table/browser state changes.
 * 'Refresh' will script refresh the page, updating the state of all jobs (or subjobs) in view, as well as updating the dropdown contents.
 * 'Return to Jobs' is visible when viewing subjobs. It will return to the list containing the parent jobs of that experiment.
 * Clicking on a table row when viewing jobs in an experiment will show you the list of its subjobs.
