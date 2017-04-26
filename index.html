@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>Lenskit Home</title>
+	<link href = "/Style.css" rel = "stylesheet" type="text/css">
+	<script src="sorttable.js"></script>
+	<script src="dropdown.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script>
+		socket = io();
+		currentExperiment = 0;
+		currentJob = 0;
+		lastSent = 0; // For refresh button, lastSent=0 if experiment, lastSent=1 if job
+		oldLocation = location.href; 
+
+		window.onload = function() {
+			preparePage();
+		}
+		
+		// Catches URL changes (back/forward button)
+		setInterval(function() {
+			if(location.href != oldLocation) {
+				preparePage();
+				oldLocation = location.href
+			}
+		}, 100)
+		
+		// Prepares and fills the page
+		function preparePage() {
+			document.getElementById('tableContents').innerHTML = '<thead><tr><th>Select an Experiment</th></tr></thead>';
+			document.getElementById('dropdownContents').innerHTML = '<button class="btn">No Experiments Found</button><br>';
+			document.getElementById("bbtn").style.visibility = "hidden";
+			currentExperiment = getQueryVariable("cE");
+			currentJob = getQueryVariable("cJ");
+			lastSent = getQueryVariable('sent');
+			if (!currentJob)
+				sendRequest('sent dropdown', 0, 'dropdownContents');
+			else
+				refreshButton();
+		}
+
+		// Handles full page refresh
+		function refreshButton() {
+			sendRequest('sent dropdown', 0, 'dropdownContents');
+			if(lastSent == '0') {
+				sendRequest('sent jobs', currentExperiment, 'tableContents');
+				document.getElementById("bbtn").style.visibility = "hidden";
+			}
+			else if(lastSent == '1') {
+				sendRequest('sent subjobs', currentJob, 'tableContents');
+				document.getElementById("bbtn").style.visibility = "visible";
+			}
+		}
+
+		// Handles dropdown selections for jobs of experiment
+		function experimentSelect() {
+			lastSent = 0;
+			currentExperiment = event.target.id;
+			sendRequest('sent dropdown', 0, 'dropdownContents');
+			sendRequest('sent jobs', currentExperiment, 'tableContents');
+			document.getElementById("bbtn").style.visibility = "hidden";
+			pushUrlState();
+		}
+
+		// Handles job selections for subjobs of job
+		function jobSelect() {
+			lastSent = 1;
+			currentJob = event.target.id;
+			sendRequest('sent dropdown', 0, 'dropdownContents');
+			sendRequest('sent subjobs', currentJob, 'tableContents');
+			document.getElementById("bbtn").style.visibility = "visible";
+			pushUrlState();
+		}
+		
+		// Handles returning to experiment's jobs from subjobs
+		function goBack() {
+			lastSent = 0;
+			sendRequest('sent dropdown', 0, 'dropdownContents');
+			sendRequest('sent jobs', currentExperiment, 'tableContents');
+			document.getElementById("bbtn").style.visibility = "hidden";
+			pushUrlState();
+		}
+		
+		// Handles all send and recieve messages between server and element fills
+		function sendRequest(message, id, element) {
+			socket.emit(message, id);
+			socket.on(message, function(msg) {
+				document.getElementById(element).innerHTML = msg;
+			})
+		}
+		
+		// Handles URL variable updates
+		function pushUrlState() {
+			window.history.pushState('Object', 'Title', '/?cE=' + currentExperiment + '&cJ=' + currentJob + '&sent=' + lastSent);
+			oldLocation = location.href;
+		}
+		
+		// Gets variables form URL
+		function getQueryVariable(variable) {
+			var query = window.location.href;
+			query = query.split("?").pop();
+			var vars = query.split("&");
+			for (var i = 0; i < vars.length; i++) {
+				var pair = vars[i].split("=");
+				if(pair[0] == variable)
+					return pair[1];
+			}
+			return(false);
+		}
+	</script>
+</head>
+<body>
+	<div class="lenskit-status">
+		<a href="http://lenskit.org/"><img src="logo.png" class="scalable" width=384 height=96></a>
+		<p><i>Open-Source Tools for Recommender Systems</i>
+	</div>
+	<div class="dropdown">
+		<button onclick="dropdownFunction();sendRequest('sent dropdown',0,'dropdownContents');" class="dropbtn">Current Experiments</button>
+		<div id="dropdownContents" class="dropdown-content"></div>
+		<button onclick="refreshButton()" id="rbtn" class="btn">Refresh</button>
+		<button onclick="goBack()" id="bbtn" class="btn">Return to Jobs</button>
+	</div>
+	<table id="tableContents" class="sortable table-fill"></table>
+	<footer>
+		<br>Copyright © 2017 <a href="https://github.com/lenskit/lenskit/blob/master/CONTRIBUTORS.md">LensKit Contributors</a>.
+		<br>Problems? Suggestions? This site is <a href="http://github.com/lenskit/lenskit.github.io">public on GitHub</a>.
+	</footer>
+</body>
+</html>
