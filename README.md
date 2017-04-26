@@ -10,7 +10,7 @@ Setup:
 
 To Run:
 1. Run on command line: node server
-2. Will be listeting at localhost:3000
+2. Will be listening at localhost:3000
 
 Functionality:
 * 'Current Experiments' button opens a dropdown that displays numbered experiments currently stored in the database. This button will refresh its contents every time it is pressed, as well as any time the table/browser state changes.
@@ -20,7 +20,7 @@ Functionality:
 * Clicking on a table row when viewing subjobs will act the same as the 'Return to Jobs' button.
 * Clicking on a table column header will sort it in descending/ascending order.
 * Using the browser refresh button will act the same as the 'Refresh Button'.
-* Using the browser back/forward buttons will return you the the previous/next page state as expected.
+* Using the browser back/forward buttons will return you the the previous/next page state and will update the table.
 * If you need to know the ID of an experiment, read the id following 'cE=' in the address bar.
 * If you need to know the ID of a job, click on the job to view its subjobs and read the id following 'cJ=' in the address bar.
 
